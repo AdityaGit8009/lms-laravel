@@ -42,6 +42,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
+            if (Schema::hasIndex('users', 'users_regno_unique')) {
+                $table->dropUnique('users_regno_unique');
+            }
+
             $columns = ['approval_status', 'college', 'regno', 'course', 'branch', 'year', 'gender', 'program', 'location'];
             foreach ($columns as $column) {
                 if (Schema::hasColumn('users', $column)) {
