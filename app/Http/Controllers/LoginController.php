@@ -47,17 +47,19 @@ class LoginController extends Controller
             }
         }
 
+        if (!$user->isAdmin() && !$user->isStudent()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'There is no portal for this account type.',
+            ], 403);
+        }
+
         Auth::login($user);
         $request->session()->regenerate();
 
         $role = strtolower((string) $user->role);
-        $redirect = route('login');
-
-        if ($role === 'admin') {
-            $redirect = route('admin.dashboard');
-        } elseif ($role === 'student') {
-            $redirect = route('student.dashboard');
-        }
+        $dashboard = route($user->isStudent() ? 'student.dashboard' : 'admin.dashboard');
+        $redirect = redirect()->intended($dashboard)->getTargetUrl();
 
         return response()->json([
             'status' => true,

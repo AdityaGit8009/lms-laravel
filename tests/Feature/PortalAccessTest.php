@@ -38,4 +38,10 @@ class PortalAccessTest extends TestCase
         $this->get(route('student.feedback.index'))->assertRedirect(route('login'));
         $this->assertGuest();
     }
+
+    public function test_signed_in_students_return_to_their_own_dashboard_from_login(): void
+    {
+        $this->actingAs(new User(['role' => 'student', 'approval_status' => 'Approved']))
+            ->get(route('login'))->assertRedirect(route('student.dashboard'));
+    }
 }

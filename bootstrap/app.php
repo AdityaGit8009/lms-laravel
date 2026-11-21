@@ -12,6 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->redirectUsersTo(fn ($request) => route(
+            $request->user()->isStudent() ? 'student.dashboard' : 'admin.dashboard'
+        ));
         $middleware->alias([
             // 'api.token' => \App\Http\Middleware\CheckApiToken::class,
             // 'api.guest' => \App\Http\Middleware\RedirectIfApiAuthenticated::class,
