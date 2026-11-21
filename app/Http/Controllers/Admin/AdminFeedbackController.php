@@ -15,7 +15,7 @@ class AdminFeedbackController extends Controller
 {
   public function create()
   {
-    return view('Admin.feedback.builder', [
+    return view('Admin.Feedback.builder', [
       'form' => null,
       'sessions' => Session::orderByDesc('session_id')->get(),
     ]);
@@ -25,7 +25,7 @@ class AdminFeedbackController extends Controller
   {
     $form = FeedbackForm::findOrFail($id);
 
-    return view('Admin.feedback.builder', [
+    return view('Admin.Feedback.builder', [
       'form' => $form,
       'sessions' => Session::orderByDesc('session_id')->get(),
     ]);
@@ -108,7 +108,7 @@ class AdminFeedbackController extends Controller
       return $form;
     });
 
-    return view('Admin.feedback.manage', compact('forms'));
+    return view('Admin.Feedback.manage', compact('forms'));
   }
 
   // public function responsePage($id)
@@ -228,7 +228,7 @@ class AdminFeedbackController extends Controller
 
     $forms = FeedbackForm::orderByDesc('form_id')->get(['form_id', 'title']);
 
-    return view('Admin.feedback.overall_analytics', compact(
+    return view('Admin.Feedback.overall_analytics', compact(
       'responses',
       'sessions',
       'forms'
