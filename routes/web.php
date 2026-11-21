@@ -42,7 +42,7 @@ Route::middleware('guest')->group(function () {
   Route::get('/register', [RegisterController::class, 'show'])->name('register');
 });
 
-Route::get('/qr-attendance', [QrAttendanceController::class, 'showForm'])->middleware('auth')->name('qr.attendance.form');
+Route::get('/qr-attendance', [QrAttendanceController::class, 'showForm'])->middleware(['auth', 'student'])->name('qr.attendance.form');
 
 Route::middleware(['auth', 'admin'])->group(function () {
   Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');

@@ -208,17 +208,19 @@ Route::prefix('admin')->middleware(['web', 'auth', 'admin'])->group(function () 
 
 
 // Attendance AJAX routes
-Route::prefix('attendance')->name('attendance.')->group(function () {
-  Route::post('/centers', [AttendanceController::class, 'getCenters'])->name('centers');
-  Route::post('/programmes', [AttendanceController::class, 'getProgrammes'])->name('programmes');
-  Route::post('/technologies', [AttendanceController::class, 'getTechnologies'])->name('technologies');
-  Route::post('/batches', [AttendanceController::class, 'getBatches'])->name('batches');
-  Route::post('/students', [AttendanceController::class, 'fetchStudents'])->name('students');
-  Route::post('/store', [AttendanceController::class, 'store'])->name('store');
+Route::prefix('attendance')->name('attendance.')->middleware(['web', 'auth'])->group(function () {
+  Route::middleware('admin')->group(function () {
+    Route::post('/centers', [AttendanceController::class, 'getCenters'])->name('centers');
+    Route::post('/programmes', [AttendanceController::class, 'getProgrammes'])->name('programmes');
+    Route::post('/technologies', [AttendanceController::class, 'getTechnologies'])->name('technologies');
+    Route::post('/batches', [AttendanceController::class, 'getBatches'])->name('batches');
+    Route::post('/students', [AttendanceController::class, 'fetchStudents'])->name('students');
+    Route::post('/store', [AttendanceController::class, 'store'])->name('store');
 
-  Route::post('/bulk-store', [AttendanceController::class, 'bulkStore'])->name('bulk.store');
+    Route::post('/bulk-store', [AttendanceController::class, 'bulkStore'])->name('bulk.store');
 
-  Route::post('/view-attandence/toggle', [AttendanceController::class, 'toggleAttendanceCell'])->name('viewattandence.toggle');
+    Route::post('/view-attandence/toggle', [AttendanceController::class, 'toggleAttendanceCell'])->name('viewattandence.toggle');
+  });
 
-  Route::post('/qr-attendance', [QrAttendanceController::class, 'submitForm'])->name('qr.attendance.submit');
+  Route::post('/qr-attendance', [QrAttendanceController::class, 'submitForm'])->middleware('student')->name('qr.attendance.submit');
 });

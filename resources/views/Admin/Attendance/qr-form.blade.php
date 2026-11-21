@@ -58,13 +58,14 @@
         </div>
         @endif
 
-        <form method="POST" action="{{ route('qr.attendance.submit') }}">
+        <form method="POST" action="{{ route('attendance.qr.attendance.submit') }}">
           @csrf
 
           <div class="mb-3">
-            <label class="form-label fw-semibold">Mobile Number</label>
+            <label for="attendanceMobile" class="form-label fw-semibold">Mobile Number</label>
             <input
               type="text"
+              id="attendanceMobile"
               name="mobile"
               class="form-control"
               maxlength="10"
