@@ -94,8 +94,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
   Route::get('/subjects/topics', [SubjectController::class, 'topicsPage'])->name('subjects.topics');
 
   Route::get('/content-bundles', [ContentBundleController::class, 'index'])->name('admin.content-bundles.index');
-  Route::get('/content-bundles/{subjectId}/{topicId}', [ContentBundleController::class, 'show'])->name('admin.content-bundles.show');
   Route::get('/content-bundles/topics/{subjectId}', [ContentBundleController::class, 'getTopicsBySubject'])->name('admin.content-bundles.topics');
+  Route::get('/content-bundles/{subjectId}/{topicId}', [ContentBundleController::class, 'show'])->name('admin.content-bundles.show');
   Route::get('/content-bundles/{subjectId}/{topicId}/edit', [ContentBundleController::class, 'edit'])->name('admin.content-bundles.edit');
 
   Route::get('/subject-mocktest', [SubjectMockTestController::class, 'index'])->name('admin.subject-mocktest.index');
