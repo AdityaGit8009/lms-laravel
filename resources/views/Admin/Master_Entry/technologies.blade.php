@@ -43,9 +43,10 @@
     $rows = '';
     if(isset($technologies) && count($technologies) > 0){
     foreach($technologies as $key => $technology){
-    $imgUrl = !empty($technology->technology_image)
-    ? asset('uploads/technologies/' . $technology->technology_image)
-    : asset('images/no-image.png');
+    $image = $technology->technology_image;
+    $imagePath = 'uploads/technologies/' . $image;
+    $imgUrl = $image && is_file(public_path($imagePath)) ? asset($imagePath) : null;
+    $imageHtml = $imgUrl ? '<img src="'.e($imgUrl).'" alt="Technology Image" style="width:50px;height:50px;object-fit:cover;border-radius:6px;border:1px solid #ddd;">' : '<span class="text-muted">No image</span>';
 
     $rows .= '
     <tr id="technology-row-'.$technology->technology_id.'">
@@ -54,7 +55,7 @@
       <td>'.($technology->programme->programme_name ?? '-').'</td>
       <td class="technology-name">'.$technology->technology_name.'</td>
       <td>
-        <img src="'.$imgUrl.'" alt="Technology Image" style="width:50px;height:50px;object-fit:cover;border-radius:6px;border:1px solid #ddd;">
+        '.$imageHtml.'
       </td>
       <td>'.($technology->created_by ?? '-').'</td>
       <td>'.($technology->updated_by ?? '-').'</td>

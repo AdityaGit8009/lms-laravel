@@ -22,15 +22,10 @@
       <div class="col-lg-4">
         <div class="card shadow-sm border-0 rounded-4">
           <div class="card-body text-center pb-5 pt-4">
-            <img
-              id="profilePreview"
-              src="{{ $admin->image ? asset('uploads/' . $admin->image) : asset('uploads/default-user.png') }}"
-              class="rounded-circle mb-3"
-              style="width:120px;height:120px;object-fit:center;border:4px solid #e9ecef;margin:auto;"
-              alt="Admin">
+            @include('Admin.includes.avatar', ['avatarUser' => $admin, 'variant' => 'preview', 'size' => 120])
 
             <h4 class="mb-1">{{ $admin->name }}</h4>
-            <p class="text-muted mb-1">{{ ucfirst($admin->role->role_name) }}</p>
+            <p class="text-muted mb-1">{{ ucfirst($admin->role) }}</p>
             <p class="mb-1"><strong>Email:</strong> {{ $admin->email }}</p>
             <p class="mb-0"><strong>Phone:</strong> {{ $admin->phone ?? 'N/A' }}</p>
           </div>
@@ -86,12 +81,17 @@
 @push('scripts')
 <script>
   $(document).ready(function() {
+    function updateAvatars(avatars, url) {
+      avatars.find('img').attr('src', url || null).toggleClass('d-none', !url);
+      avatars.children('span').toggleClass('d-none', Boolean(url));
+    }
+
     $('#imageInput').on('change', function(e) {
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = function(ev) {
-          $('#profilePreview').attr('src', ev.target.result);
+          updateAvatars($('[data-admin-avatar="preview"]'), ev.target.result);
         };
         reader.readAsDataURL(file);
       }
@@ -115,8 +115,7 @@
         success: function(response) {
           $('#profileMsg').html('<div class="alert alert-success">' + response.message + '</div>');
 
-          $('#profilePreview').attr('src', response.image_url);
-          $('#profileAvatar').attr('src', response.image_url);
+          updateAvatars($('[data-admin-avatar]'), response.image_url);
 
           $('#adminNameText').text(response.name);
           $('#adminEmailText').html('<strong>Email:</strong> ' + response.email);

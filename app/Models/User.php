@@ -117,6 +117,15 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class, 'role_id', 'role_id');
     }
 
+    public function adminAvatarUrl(): ?string
+    {
+        if ($this->image && is_file(public_path('uploads/' . $this->image))) {
+            return asset('uploads/' . $this->image);
+        }
+
+        return null;
+    }
+
     public function isAdmin(): bool
     {
         return strtolower((string) $this->role) === 'admin';

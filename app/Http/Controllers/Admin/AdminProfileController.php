@@ -47,9 +47,7 @@ class AdminProfileController extends Controller
         return response()->json([
             'status'    => true,
             'message'   => 'Profile updated successfully.',
-            'image_url' => $admin->image
-                ? asset('uploads/' . $admin->image)
-                : asset('uploads/default-user.png'),
+            'image_url' => $admin->adminAvatarUrl(),
             'name'      => $admin->name,
             'phone'     => $admin->phone,
             'email'     => $admin->email,

@@ -46,13 +46,7 @@ $notifs = [
     </div>
 
     <div class="profile-hover-box">
-      <img
-        src="{{ !empty(auth()->user()->image) && file_exists(public_path('uploads/' . auth()->user()->image))
-      ? asset('uploads/' . auth()->user()->image)
-      : asset('uploads/office-man.webp') }}"
-        class="topbar-avatar ms-1"
-        alt="Admin"
-        id="profileAvatar" style="width:40px;height:40px;object-fit:center;border:4px solid rgb(0, 4, 255);" />
+      @include('Admin.includes.avatar', ['avatarUser' => auth()->user(), 'variant' => 'topbar', 'size' => 40])
       <div class="logout-dropdown" id="logoutDropdown">
         <div>
           <a href="{{ route('admin.profile') }}" class="dropdown-item">

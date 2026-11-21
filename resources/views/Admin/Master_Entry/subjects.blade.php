@@ -45,9 +45,10 @@
     $rows = '';
     if(isset($subjects) && count($subjects) > 0){
     foreach($subjects as $key => $subject){
-    $imgUrl = !empty($subject->subject_image)
-    ? asset('uploads/subjects/' . $subject->subject_image)
-    : asset('images/no-image.png');
+    $image = $subject->subject_image;
+    $imagePath = 'uploads/subjects/' . $image;
+    $imgUrl = $image && is_file(public_path($imagePath)) ? asset($imagePath) : null;
+    $imageHtml = $imgUrl ? '<img src="'.e($imgUrl).'" alt="Subject Image" style="width:50px;height:50px;object-fit:cover;border-radius:6px;border:1px solid #ddd;">' : '<span class="text-muted">No image</span>';
 
     $plainSyllabus = trim(strip_tags($subject->syllabus ?? ''));
     $escapedFullHtml = htmlspecialchars($subject->syllabus ?? '', ENT_QUOTES, 'UTF-8');
@@ -71,7 +72,7 @@
       <td>'.($key + 1).'</td>
       <td class="subject-name">'.e($subject->subject_name).'</td>
       <td>
-        <img src="'.$imgUrl.'" alt="Subject Image" style="width:50px;height:50px;object-fit:cover;border-radius:6px;border:1px solid #ddd;">
+        '.$imageHtml.'
       </td>
       <td>'.$syllabusHtml.'</td>
       <td>

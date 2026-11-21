@@ -44,4 +44,12 @@ class PortalAccessTest extends TestCase
         $this->actingAs(new User(['role' => 'student', 'approval_status' => 'Approved']))
             ->get(route('login'))->assertRedirect(route('student.dashboard'));
     }
+
+    public function test_the_admin_profile_uses_the_account_role_and_an_avatar_fallback(): void
+    {
+        $admin = new User(['role' => 'admin', 'name' => 'Test Admin', 'image' => 'missing-test-image.png']);
+        $this->actingAs($admin)->get(route('admin.profile'))->assertOk()
+            ->assertSee('Test Admin')->assertSee('data-admin-avatar="preview"', false)
+            ->assertDontSee('missing-test-image.png');
+    }
 }
