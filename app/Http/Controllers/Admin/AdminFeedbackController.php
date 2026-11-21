@@ -391,20 +391,10 @@ class AdminFeedbackController extends Controller
         ->toArray();
 
       $responses = FeedbackResponse::whereIn('form_id', array_values($eligibleFormIds))
-        ->where(function ($q) use ($studentUserIds, $studentEmails) {
-          if (!empty($studentUserIds)) {
-            $q->whereIn('user_id', $studentUserIds);
-          }
-
-          if (!empty($studentEmails)) {
-            if (!empty($studentUserIds)) {
-              $q->orWhereIn('email', $studentEmails)
-                ->orWhereIn('respondent_email', $studentEmails);
-            } else {
-              $q->whereIn('email', $studentEmails)
-                ->orWhereIn('respondent_email', $studentEmails);
-            }
-          }
+        ->where(function ($q) use ($eligibleStudentMap, $studentUserIds, $studentEmails) {
+          $q->whereIn('student_id', array_keys($eligibleStudentMap))
+            ->orWhereIn('user_id', $studentUserIds)
+            ->orWhereIn('email', $studentEmails);
         })
         ->orderBy('response_id')
         ->get();
@@ -415,7 +405,7 @@ class AdminFeedbackController extends Controller
         });
 
         return [
-          'name'   => $matchedStudent->stu_name ?? ($response->name ?: ($response->username ?: 'Student')),
+          'name'   => $matchedStudent->stu_name ?? ($response->student_name ?: 'Student'),
           'mobile' => $matchedStudent->stu_mobile ?? '-',
         ];
       })->unique(function ($item) {
@@ -429,7 +419,7 @@ class AdminFeedbackController extends Controller
           return $this->responseBelongsToStudent($response, $student);
         });
 
-        $studentName = $matchedStudent->stu_name ?? ($response->name ?: ($response->username ?: 'Student'));
+        $studentName = $matchedStudent->stu_name ?? ($response->student_name ?: 'Student');
         $studentMobile = $matchedStudent->stu_mobile ?? '-';
 
         foreach (($response->answers_json ?? []) as $answer) {
@@ -643,38 +633,25 @@ class AdminFeedbackController extends Controller
   private function findStudentResponse($student, int $formId)
   {
     return FeedbackResponse::where('form_id', $formId)
-      ->where(function ($q) use ($student) {
-        if (!empty($student->user_id)) {
-          $q->where('user_id', $student->user_id);
-        }
-
-        if (!empty($student->stu_email)) {
-          if (!empty($student->user_id)) {
-            $q->orWhere('email', $student->stu_email)
-              ->orWhere('respondent_email', $student->stu_email);
-          } else {
-            $q->where('email', $student->stu_email)
-              ->orWhere('respondent_email', $student->stu_email);
-          }
-        }
-      })
+      ->forStudent($student->stu_id, $student->user_id, $student->stu_email)
       ->latest('response_id')
       ->first();
   }
 
   private function responseBelongsToStudent($response, $student): bool
   {
+    if ((int) $response->student_id === (int) $student->stu_id) {
+      return true;
+    }
+
     if (!empty($student->user_id) && (int) $response->user_id === (int) $student->user_id) {
       return true;
     }
 
     $studentEmail = strtolower((string) ($student->stu_email ?? ''));
     $responseEmail = strtolower((string) ($response->email ?? ''));
-    $respondentEmail = strtolower((string) ($response->respondent_email ?? ''));
 
-    return $studentEmail !== '' && (
-      $studentEmail === $responseEmail || $studentEmail === $respondentEmail
-    );
+    return $studentEmail !== '' && $studentEmail === $responseEmail;
   }
 
   private function resolveNames(string $table, string $idColumn, string $nameColumn, ?array $ids): string

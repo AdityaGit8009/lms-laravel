@@ -28,14 +28,7 @@ class StudentFeedbackController extends Controller
       })
       ->map(function ($form) use ($studentProfile) {
         $submitted = FeedbackResponse::where('form_id', $form->form_id)
-          ->where(function ($q) use ($studentProfile) {
-            $q->where('user_id', Auth::id());
-
-            if (!empty($studentProfile->stu_email)) {
-              $q->orWhere('email', $studentProfile->stu_email)
-                ->orWhere('respondent_email', $studentProfile->stu_email);
-            }
-          })
+          ->forStudent($studentProfile->stu_id, Auth::id(), $studentProfile->stu_email)
           ->exists();
 
         $form->submitted = $submitted;
@@ -64,14 +57,7 @@ class StudentFeedbackController extends Controller
     }
 
     $alreadySubmitted = FeedbackResponse::where('form_id', $form->form_id)
-      ->where(function ($q) use ($studentProfile) {
-        $q->where('user_id', Auth::id());
-
-        if (!empty($studentProfile->stu_email)) {
-          $q->orWhere('email', $studentProfile->stu_email)
-            ->orWhere('respondent_email', $studentProfile->stu_email);
-        }
-      })
+      ->forStudent($studentProfile->stu_id, Auth::id(), $studentProfile->stu_email)
       ->exists();
 
     if ($alreadySubmitted) {
@@ -100,14 +86,7 @@ class StudentFeedbackController extends Controller
     }
 
     $alreadySubmitted = FeedbackResponse::where('form_id', $form->form_id)
-      ->where(function ($q) use ($studentProfile) {
-        $q->where('user_id', Auth::id());
-
-        if (!empty($studentProfile->stu_email)) {
-          $q->orWhere('email', $studentProfile->stu_email)
-            ->orWhere('respondent_email', $studentProfile->stu_email);
-        }
-      })
+      ->forStudent($studentProfile->stu_id, Auth::id(), $studentProfile->stu_email)
       ->exists();
 
     if ($alreadySubmitted) {
@@ -155,9 +134,10 @@ class StudentFeedbackController extends Controller
       'form_id'          => $form->form_id,
       'user_id'          => Auth::id(),
       'email'            => $studentProfile->stu_email,
-      'respondent_email' => $studentProfile->stu_email,
-      'name'             => $studentProfile->stu_name,
-      'username'         => $studentProfile->stu_name,
+      'student_id'       => $studentProfile->stu_id,
+      'student_name'     => $studentProfile->stu_name,
+      'center_id'        => $studentProfile->center_id,
+      'session_id'       => $studentProfile->stu_session,
       'mobile'           => $studentProfile->stu_mobile,
       'answers_json'     => $answersPayload,
     ]);
