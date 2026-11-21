@@ -25,4 +25,17 @@ class PortalAccessTest extends TestCase
         $this->getJson(route('admin.notifications.list'))->assertForbidden();
         $this->postJson(route('admin.approvals.updateStatus', 1))->assertForbidden();
     }
+
+    public function test_student_pages_share_approval_and_role_checks(): void
+    {
+        $admin = new User(['role' => 'admin']);
+        $this->actingAs($admin)->get(route('student.profile'))->assertForbidden();
+        $this->assertAuthenticatedAs($admin);
+
+        $student = new User(['role' => 'student', 'approval_status' => 'Approved', 'name' => 'Test Student']);
+        $this->actingAs($student)->get(route('student.profile'))->assertOk()->assertSee('Test Student');
+        $student->is_block = 'Y';
+        $this->get(route('student.feedback.index'))->assertRedirect(route('login'));
+        $this->assertGuest();
+    }
 }

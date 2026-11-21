@@ -123,7 +123,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
   Route::get('/admin/change-password', [AdminProfileController::class, 'changePasswordPage'])->name('admin.change.password');
 });
 
-Route::prefix('student')->middleware('auth')->group(function () {
+Route::prefix('student')->middleware(['auth', 'student'])->group(function () {
   Route::get('/dashboard', [DashboardController::class, 'index'])->name('student.dashboard');
   Route::get('/courses', [DashboardController::class, 'courses'])->name('student.courses');
   Route::get('/assignments', [DashboardController::class, 'assignments'])->name('student.assignments');

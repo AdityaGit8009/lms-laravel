@@ -15,8 +15,24 @@ class StudentMiddleware
       return redirect()->route('login');
     }
 
-    if (strtolower((string) (Auth::user()->role ?? '')) !== 'student') {
+    $student = $request->user();
+    if (!$student->isStudent()) {
       abort(403, 'Unauthorized access.');
+    }
+
+    $message = null;
+    if ($student->approval_status !== 'Approved') {
+      $message = 'Your account is not approved yet.';
+    } elseif ($student->is_block === 'Y') {
+      $message = 'Your account has been blocked.';
+    }
+
+    if ($message !== null) {
+      Auth::logout();
+      $request->session()->invalidate();
+      $request->session()->regenerateToken();
+
+      return redirect()->route('login')->with('error', $message);
     }
 
     return $next($request);
