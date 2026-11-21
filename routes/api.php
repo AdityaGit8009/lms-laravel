@@ -34,17 +34,19 @@ Route::prefix('auth')->middleware('web')->group(function () {
   Route::post('/login', [LoginController::class, 'login'])->name('api.login');
   Route::post('/logout', [LoginController::class, 'logout'])->name('api.logout');
 
-  Route::post('/approvals/{id}/update-status', [AdminDashboardController::class, 'updateApprovalStatus'])
-    ->name('admin.approvals.updateStatus');
+  Route::middleware(['auth', 'admin'])->group(function () {
+    Route::post('/approvals/{id}/update-status', [AdminDashboardController::class, 'updateApprovalStatus'])
+      ->name('admin.approvals.updateStatus');
 
-  Route::post('/admin/profile/update', [AdminProfileController::class, 'update'])
-    ->name('api.admin.profile.update');
+    Route::post('/admin/profile/update', [AdminProfileController::class, 'update'])
+      ->name('api.admin.profile.update');
 
-  Route::post('/admin/change-password', [AdminProfileController::class, 'changePassword'])
-    ->name('api.admin.change.password');
+    Route::post('/admin/change-password', [AdminProfileController::class, 'changePassword'])
+      ->name('api.admin.change.password');
+  });
 });
 
-Route::prefix('admin')->group(function () {
+Route::prefix('admin')->middleware(['web', 'auth', 'admin'])->group(function () {
   // Roles
   Route::post('/roles', [RoleController::class, 'store'])->name('api.admin.roles.store');
   Route::put('/roles/{id}', [RoleController::class, 'update'])->name('api.admin.roles.update');

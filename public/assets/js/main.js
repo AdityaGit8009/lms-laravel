@@ -1,3 +1,9 @@
+$.ajaxPrefilter(function (options, originalOptions, xhr) {
+    if (!options.crossDomain && !/^(GET|HEAD|OPTIONS)$/i.test(options.type)) {
+        xhr.setRequestHeader("X-CSRF-TOKEN", document.querySelector('meta[name="csrf-token"]').content);
+    }
+});
+
 /* EDUCORE LMS — main.js */
 var DEFAULTS = {
     theme: "dark",

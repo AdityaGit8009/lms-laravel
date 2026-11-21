@@ -17,4 +17,12 @@ class PortalAccessTest extends TestCase
         $this->actingAs(new User(['role' => 'Admin', 'name' => 'Test Admin']));
         $this->get(route('admin.settings'))->assertOk();
     }
+
+    public function test_management_requests_use_the_administrator_session(): void
+    {
+        $this->getJson(route('admin.notifications.list'))->assertUnauthorized();
+        $this->actingAs(new User(['role' => 'student']));
+        $this->getJson(route('admin.notifications.list'))->assertForbidden();
+        $this->postJson(route('admin.approvals.updateStatus', 1))->assertForbidden();
+    }
 }
