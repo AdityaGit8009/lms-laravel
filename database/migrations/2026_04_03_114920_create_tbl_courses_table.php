@@ -17,10 +17,21 @@ return new class extends Migration
             $table->string('updated_by', 100)->nullable();
             $table->timestamps();
         });
+
+        Schema::table('tbl_branches', function (Blueprint $table) {
+            $table->foreign('course_id')->references('course_id')->on('tbl_courses')->onDelete('cascade');
+        });
     }
 
     public function down(): void
     {
+        $foreignKeys = collect(Schema::getForeignKeys('tbl_branches'));
+        if ($foreignKeys->contains(fn ($key) => $key['columns'] === ['course_id'])) {
+            Schema::table('tbl_branches', function (Blueprint $table) {
+                $table->dropForeign(['course_id']);
+            });
+        }
+
         Schema::dropIfExists('tbl_courses');
     }
 };

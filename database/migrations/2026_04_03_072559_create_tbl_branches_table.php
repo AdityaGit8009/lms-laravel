@@ -8,6 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // MySQL may already have created this table before the old foreign key step failed.
+        if (Schema::hasTable('tbl_branches')) {
+            return;
+        }
+
         Schema::create('tbl_branches', function (Blueprint $table) {
             $table->bigIncrements('branch_id');
             $table->unsignedBigInteger('course_id');
@@ -15,8 +20,6 @@ return new class extends Migration
             $table->string('created_by', 100)->nullable();
             $table->string('updated_by', 100)->nullable();
             $table->timestamps();
-
-            $table->foreign('course_id')->references('course_id')->on('tbl_courses')->onDelete('cascade');
         });
     }
 
