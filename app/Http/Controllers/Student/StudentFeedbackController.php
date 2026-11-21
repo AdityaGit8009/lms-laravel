@@ -163,7 +163,8 @@ class StudentFeedbackController extends Controller
 
   private function studentMatchesForm($studentProfile, $form): bool
   {
-    return $this->matchSelectedIds($studentProfile->stu_session ?? null, $form->session_ids ?? [])
+    return $this->matchSelectedIds($studentProfile->center_id ?? null, $form->center_ids ?? [])
+      && $this->matchSelectedIds($studentProfile->stu_session ?? null, $form->session_ids ?? [])
       && $this->matchSelectedIds($studentProfile->stu_course ?? null, $form->programme_ids ?? [])
       && $this->matchSelectedIds($studentProfile->stu_branch ?? null, $form->technology_ids ?? [])
       && $this->matchSelectedIds($studentProfile->stu_pro ?? null, $form->batch_ids ?? []);

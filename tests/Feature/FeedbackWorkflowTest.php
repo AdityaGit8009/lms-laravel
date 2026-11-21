@@ -41,7 +41,14 @@ class FeedbackWorkflowTest extends TestCase
             'public_key' => (string) Str::uuid(), 'title' => 'Course review', 'form_status' => 'open',
             'questions_json' => [['text' => 'What helped?', 'type' => 'short_answer', 'required' => true]],
         ]);
-        $this->actingAs($user)->get(route('student.feedback.show', $form))->assertOk();
+        $anotherCenter = FeedbackForm::create([
+            'public_key' => (string) Str::uuid(), 'title' => 'Other center review', 'form_status' => 'open',
+            'center_ids' => [8], 'questions_json' => [],
+        ]);
+        $this->actingAs($user)->get(route('student.feedback.index'))->assertOk()
+            ->assertSee($form->title)->assertDontSee($anotherCenter->title);
+        $this->get(route('student.feedback.show', $anotherCenter))->assertForbidden();
+        $this->get(route('student.feedback.show', $form))->assertOk();
         $this->post(route('student.feedback.store', $form), ['question_0' => 'Practice'])
             ->assertRedirect(route('student.feedback.index'))->assertSessionHas('success');
         $this->post(route('student.feedback.store', $form), ['question_0' => 'Practice'])

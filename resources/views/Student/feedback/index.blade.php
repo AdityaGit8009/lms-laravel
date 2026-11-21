@@ -9,10 +9,10 @@
       <div class="mb-4">
         <h3 class="mb-1">Available Feedback Forms</h3>
         <p class="text-muted mb-0">
-          Session: {{ $student->stu_session ?? '-' }} |
-          Programme: {{ $student->stu_course ?? '-' }} |
-          Technology: {{ $student->stu_branch ?? '-' }} |
-          Batch: {{ $student->stu_pro ?? '-' }}
+          Session: {{ $studentProfile->stu_session ?? '-' }} |
+          Programme: {{ $studentProfile->stu_course ?? '-' }} |
+          Technology: {{ $studentProfile->stu_branch ?? '-' }} |
+          Batch: {{ $studentProfile->stu_pro ?? '-' }}
         </p>
       </div>
 
