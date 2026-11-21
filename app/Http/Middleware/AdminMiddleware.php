@@ -15,7 +15,7 @@ class AdminMiddleware
       return redirect()->route('login');
     }
 
-    if ((Auth::user()->role ?? null) !== 'admin') {
+    if (!Auth::user()->isAdmin()) {
       abort(403, 'Unauthorized access.');
     }
 

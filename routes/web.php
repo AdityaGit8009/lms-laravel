@@ -42,7 +42,9 @@ Route::middleware('guest')->group(function () {
   Route::get('/register', [RegisterController::class, 'show'])->name('register');
 });
 
-Route::middleware('auth')->group(function () {
+Route::get('/qr-attendance', [QrAttendanceController::class, 'showForm'])->middleware('auth')->name('qr.attendance.form');
+
+Route::middleware(['auth', 'admin'])->group(function () {
   Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
   Route::get('/add_course', [AdminDashboardController::class, 'courses'])->name('admin.add_course');
   Route::get('/add_student', [AdminDashboardController::class, 'students'])->name('admin.add_student');
@@ -83,8 +85,6 @@ Route::middleware('auth')->group(function () {
   Route::get('/view-attandence/data', [AttendanceController::class, 'viewAttendanceData'])->name('admin.viewattandence.data');
 
   Route::get('/attendance/bulk-template', [AttendanceController::class, 'downloadBulkTemplate'])->name('attendance.bulk.template');
-
-  Route::get('/qr-attendance', [QrAttendanceController::class, 'showForm'])->name('qr.attendance.form');
 
   Route::get('/upload-content', [UploadContentController::class, 'index'])->name('upload-content.index');
   Route::get('/upload-content/topics/{subjectId}', [UploadContentController::class, 'getTopicsBySubject'])->name('upload-content.topics');
@@ -167,7 +167,7 @@ Route::middleware(['auth', 'student'])->prefix('student')->name('student.')->gro
   Route::post('/feedback/{formId}', [StudentFeedbackController::class, 'store'])->name('feedback.store');
 });
 
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
   Route::get('/student-login-status', [StudentLoginStatusController::class, 'index'])
     ->name('student.login.status');
 
