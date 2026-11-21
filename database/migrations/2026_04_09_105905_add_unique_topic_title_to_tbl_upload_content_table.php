@@ -49,7 +49,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('tbl_upload_content', function (Blueprint $table) {
-            if ($this->hasIndex('tbl_upload_content', 'uq_upload_content_topic_title_key')) {
+            if (Schema::hasIndex('tbl_upload_content', 'uq_upload_content_topic_title_key')) {
                 $table->dropUnique('uq_upload_content_topic_title_key');
             }
         });
@@ -59,20 +59,5 @@ return new class extends Migration
                 $table->dropColumn('title_key');
             });
         }
-    }
-
-    private function hasIndex(string $table, string $indexName): bool
-    {
-        $database = DB::getDatabaseName();
-
-        $result = DB::select("
-            SELECT COUNT(1) AS total
-            FROM information_schema.statistics
-            WHERE table_schema = ?
-              AND table_name = ?
-              AND index_name = ?
-        ", [$database, $table, $indexName]);
-
-        return !empty($result) && (int) $result[0]->total > 0;
     }
 };
