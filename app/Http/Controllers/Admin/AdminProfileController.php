@@ -12,7 +12,7 @@ class AdminProfileController extends Controller
     public function index()
     {
         $admin = Auth::user();
-        return view('admin.profile', compact('admin'));
+        return view('Admin.profile', compact('admin'));
     }
 
     public function update(Request $request)
@@ -58,7 +58,7 @@ class AdminProfileController extends Controller
 
     public function changePasswordPage()
     {
-        return view('admin.change-password');
+        return view('Admin.change-password');
     }
 
     public function changePassword(Request $request)
