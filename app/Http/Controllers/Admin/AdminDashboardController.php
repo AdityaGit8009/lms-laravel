@@ -9,6 +9,8 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class AdminDashboardController extends Controller
@@ -65,28 +67,35 @@ class AdminDashboardController extends Controller
 
   public function updateApprovalStatus(Request $request, $id): RedirectResponse
   {
-    $request->validate([
+    $validated = $request->validate([
       'approval_status' => 'required|in:Approved,Pending,Rejected',
     ]);
 
-    $student = RegisterStudent::findOrFail($id);
-    $student->approval_status = $request->approval_status;
-    $student->save();
+    DB::transaction(function () use ($id, $validated) {
+      $student = RegisterStudent::lockForUpdate()->findOrFail($id);
+      $account = User::where('email', $student->email)->lockForUpdate()->first();
+      if (!$account || !$account->isStudent()) {
+        throw ValidationException::withMessages([
+          'approval_status' => 'This registration has no matching student login account.',
+        ]);
+      }
 
-    User::where('email', $student->email)->update([
-      'approval_status' => $request->approval_status,
-      'name'            => $student->name,
-      'phone'           => $student->mobile,
-      'college'         => $student->college,
-      'regno'           => $student->regno,
-      'course'          => $student->course,
-      'branch'          => $student->branch,
-      'year'            => $student->year,
-      'gender'          => ucfirst((string) $student->gender),
-      'program'         => $student->program,
-      'location'        => $student->location,
-      'image'           => $student->photo,
-    ]);
+      $account->update([
+        'approval_status' => $validated['approval_status'],
+        'name'            => $student->name,
+        'phone'           => $student->mobile,
+        'college'         => $student->college,
+        'regno'           => $student->regno,
+        'course'          => $student->course,
+        'branch'          => $student->branch,
+        'year'            => $student->year,
+        'gender'          => ucfirst((string) $student->gender),
+        'program'         => $student->program,
+        'location'        => $student->location,
+        'image'           => $student->photo,
+      ]);
+      $student->update(['approval_status' => $validated['approval_status']]);
+    });
 
     return redirect()
       ->route('admin.approvals')

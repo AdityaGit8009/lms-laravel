@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -35,10 +36,10 @@ class RegisterController extends Controller
             'pic'      => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
 
+        $photoPath = null;
         DB::beginTransaction();
 
         try {
-            $photoPath = null;
 
             if ($request->hasFile('pic')) {
                 $photoPath = $request->file('pic')->store('students', 'public');
@@ -90,11 +91,14 @@ class RegisterController extends Controller
             ], 201);
         } catch (\Throwable $e) {
             DB::rollBack();
+            if ($photoPath !== null) {
+                Storage::disk('public')->delete($photoPath);
+            }
+            report($e);
 
             return response()->json([
                 'status'  => false,
                 'message' => 'Registration failed.',
-                'error'   => $e->getMessage(),
             ], 500);
         }
     }

@@ -136,13 +136,13 @@ php artisan key:generate
 
 ### 5. Set up the database — choose one path
 
-**Option A — migrations** (recommended for an empty database when migrations are complete):
+**Empty database.** Select an empty database in your local environment file and run:
 
 ```bash
 php artisan migrate
 ```
 
-**Option B — included SQL dump** (for a compatible database): import `lms_fixed.sql` using your database client. The repository's `README_FIX.txt` lists this as an alternative to migrations. **Do not automatically run migrations on top of an imported dump without checking table/schema compatibility and making a backup.**
+**Existing SQL snapshot.** Import `lms_fixed.sql` into a dedicated MySQL database if you need its existing records. Back up existing installations, inspect `php artisan migrate:status`, then run `php artisan migrate` to apply pending migrations. The attendance update enforces one mark per date, batch, and student. It reports historical duplicates for review before applying the constraint. On MySQL, the account and attendance updates use InnoDB for coordinated writes.
 
 ### 6. Install frontend dependencies
 
@@ -219,7 +219,7 @@ php artisan optimize:clear
 npm run build
 ```
 
-Test results and full feature completion have not been independently verified.
+The default PHPUnit configuration uses in-memory SQLite. The feature suite covers registration and approval, portal access, feedback submissions, password changes, and attendance reporting and check-in.
 
 ## 🔒 Security & Deployment Checklist
 
