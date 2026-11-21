@@ -46,8 +46,8 @@ Route::get('/qr-attendance', [QrAttendanceController::class, 'showForm'])->middl
 
 Route::middleware(['auth', 'admin'])->group(function () {
   Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
-  Route::get('/add_course', [AdminDashboardController::class, 'courses'])->name('admin.add_course');
-  Route::get('/add_student', [AdminDashboardController::class, 'students'])->name('admin.add_student');
+  Route::get('/add_course', [CourseController::class, 'index'])->name('admin.add_course');
+  Route::get('/add_student', [StudentController::class, 'students'])->name('admin.add_student');
   Route::get('/courses', [CourseController::class, 'index'])->name('admin.courses');
   Route::get('/announcements', [AdminDashboardController::class, 'announcements'])->name('admin.announcements');
 

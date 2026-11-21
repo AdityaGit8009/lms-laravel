@@ -30,4 +30,13 @@ class AcademicRoutesTest extends TestCase
             ->assertViewHas('fromDate', '2026-01-03')
             ->assertViewHas('totalStudents', 0);
     }
+
+    public function test_dashboard_shortcuts_open_the_live_creation_forms(): void
+    {
+        $this->actingAs(new User(['role' => 'admin', 'name' => 'Test Admin']));
+        $this->get(route('admin.add_course'))->assertOk()->assertViewIs('Admin.Master_Entry.courses')
+            ->assertSee("document.getElementById('addCourseModal')).show()", false);
+        $this->get(route('admin.add_student'))->assertOk()->assertViewIs('Admin.Students.index')
+            ->assertSee("document.getElementById('addStudentModal')).show()", false);
+    }
 }

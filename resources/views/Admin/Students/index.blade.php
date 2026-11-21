@@ -688,6 +688,10 @@
 
 <script>
   $(function() {
+    @if(request()->routeIs('admin.add_student'))
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('addStudentModal')).show();
+    @endif
+
     let noBatchOnly = 0;
 
     const studentsTable = $('#studentsTable').DataTable({

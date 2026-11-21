@@ -167,6 +167,10 @@
 
 <script>
   $(function() {
+    @if(request()->routeIs('admin.add_course'))
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('addCourseModal')).show();
+    @endif
+
     $('#coursesTable').DataTable({
       pageLength: 10,
       lengthChange: true,
