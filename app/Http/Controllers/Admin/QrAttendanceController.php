@@ -82,9 +82,9 @@ class QrAttendanceController extends Controller
                 }
 
                 return back()->with('success', 'Attendance marked successfully.');
-            });
+            }, 3);
         } catch (UniqueConstraintViolationException $exception) {
-            return back()->with('error', 'Attendance has already been marked from this device today.');
+            return back()->with('error', 'Attendance has already been marked for this batch or device today.');
         }
     }
 

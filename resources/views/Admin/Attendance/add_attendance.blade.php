@@ -530,7 +530,7 @@
         let rows = '';
 
         if (!students.length) {
-          rows = `<tr><td colspan="7" class="text-center py-4">No students found.</td></tr>`;
+          rows = `<tr><td colspan="7" class="text-center py-4">No unmarked students for these filters.</td></tr>`;
         } else {
           $.each(students, function(index, student) {
             const presentChecked = student.attendance_status === 'P' ? 'checked' : '';

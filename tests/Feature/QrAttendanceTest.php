@@ -55,5 +55,27 @@ class QrAttendanceTest extends TestCase
         $this->post($submit, ['mobile' => $mobile])->assertSessionHas('error');
         $this->assertDatabaseCount('tbl_attendance', 1);
         $this->assertDatabaseCount('tbl_qr_attendance_device_logs', 1);
+
+        $otherLearner = (array) DB::table('tbl_student')->where('stu_id', $studentId)->first();
+        unset($otherLearner['stu_id']);
+        $secondId = DB::table('tbl_student')->insertGetId(array_replace($otherLearner, [
+            'stu_regid' => 'TEST0002', 'stu_email' => 'another@example.test', 'stu_mobile' => '9000000002',
+        ]));
+        DB::table('tbl_student')->whereIn('stu_id', [$studentId, $secondId])->update(['center_id' => 1]);
+        DB::table('tbl_student_batch')->insert(['stu_id' => $secondId, 'batch_id' => $batch]);
+        $admin = new User(['role' => 'admin']);
+        $admin->id = 29;
+        $this->actingAs($admin)->postJson(route('attendance.students'), [
+            'session_ids' => [$session], 'center_ids' => [1], 'programme_ids' => [$programme],
+            'technology_ids' => [$technology], 'batch_ids' => [$batch],
+        ])->assertOk()->assertJsonCount(1, 'data')->assertJsonPath('data.0.stu_id', $secondId);
+
+        $row = ['batch_id' => $batch, 'technology_id' => $technology, 'center_id' => 1,
+            'programme_id' => $programme, 'session_id' => $session, 'attendance' => 'A'];
+        $this->postJson(route('attendance.store'), [
+            'students' => [$row + ['stu_id' => $studentId], $row + ['stu_id' => $secondId]],
+        ])->assertOk()->assertJsonPath('status', true);
+        $this->assertDatabaseCount('tbl_attendance', 2);
+        $this->assertDatabaseHas('tbl_attendance', ['attend_student' => $studentId, 'attendance' => 'P']);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Attendance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -29,40 +30,6 @@ class AttendanceController extends Controller
         }
 
         return [$value];
-    }
-
-    private function attendanceAlreadyMarked(
-        string $attendanceDate,
-        array $sessionIds = [],
-        array $centerIds = [],
-        array $programmeIds = [],
-        array $technologyIds = [],
-        array $batchIds = []
-    ): bool {
-        $query = DB::table('tbl_attendance')
-            ->where('attend_date', $attendanceDate);
-
-        if (!empty($sessionIds)) {
-            $query->whereIn('attend_session', array_map('strval', $sessionIds));
-        }
-
-        if (!empty($centerIds)) {
-            $query->whereIn('attend_center', array_map('strval', $centerIds));
-        }
-
-        if (!empty($programmeIds)) {
-            $query->whereIn('attend_programme', array_map('strval', $programmeIds));
-        }
-
-        if (!empty($technologyIds)) {
-            $query->whereIn('attend_technology', array_map('strval', $technologyIds));
-        }
-
-        if (!empty($batchIds)) {
-            $query->whereIn('attend_batch', array_map('strval', $batchIds));
-        }
-
-        return $query->exists();
     }
 
     public function getCenters(Request $request)
@@ -167,20 +134,6 @@ class AttendanceController extends Controller
             ]);
         }
 
-        if ($this->attendanceAlreadyMarked(
-            $attendanceDate,
-            $sessionIds,
-            $centerIds,
-            $programmeIds,
-            $technologyIds,
-            $batchIds
-        )) {
-            return response()->json([
-                'status'  => false,
-                'message' => 'Attendance already marked for selected date and filters.'
-            ]);
-        }
-
         $students = DB::table('tbl_student_batch as sb')
             ->join('tbl_student as s', 's.stu_id', '=', 'sb.stu_id')
             ->join('tbl_batch as b', 'b.batch_id', '=', 'sb.batch_id')
@@ -192,6 +145,12 @@ class AttendanceController extends Controller
             ->whereIn('b.programme_id', $programmeIds)
             ->whereIn('b.technology_id', $technologyIds)
             ->whereIn('b.batch_id', $batchIds)
+            ->whereNotExists(function ($query) use ($attendanceDate) {
+                $query->selectRaw('1')->from('tbl_attendance as a')
+                    ->where('a.attend_date', $attendanceDate)
+                    ->whereColumn('a.attend_batch', 'b.batch_id')
+                    ->whereColumn('a.attend_student', 's.stu_id');
+            })
             ->select(
                 's.stu_id',
                 's.stu_regid',
@@ -233,28 +192,6 @@ class AttendanceController extends Controller
             ]);
         }
 
-        $firstRow = $students[0] ?? [];
-
-        $sessionIds    = isset($firstRow['session_id']) ? [(string) $firstRow['session_id']] : [];
-        $centerIds     = isset($firstRow['center_id']) ? [(string) $firstRow['center_id']] : [];
-        $programmeIds  = isset($firstRow['programme_id']) ? [(string) $firstRow['programme_id']] : [];
-        $technologyIds = isset($firstRow['technology_id']) ? [(string) $firstRow['technology_id']] : [];
-        $batchIds      = isset($firstRow['batch_id']) ? [(string) $firstRow['batch_id']] : [];
-
-        if ($this->attendanceAlreadyMarked(
-            $attendanceDate,
-            $sessionIds,
-            $centerIds,
-            $programmeIds,
-            $technologyIds,
-            $batchIds
-        )) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Attendance already marked for selected date and filters.'
-            ]);
-        }
-
         $attendBy = (string) (auth()->id() ?? '48');
         $addedDate = now()->format('Y-m-d');
         $addedTime = now()->format('H:i:s');
@@ -278,27 +215,30 @@ class AttendanceController extends Controller
                 $attendance = 'A';
             }
 
-            DB::table('tbl_attendance')->insert([
-                'attend_date'       => $attendanceDate,
-                'attend_session'    => (string) ($sessionId ?? ''),
-                'attend_center'     => (string) ($centerId ?? ''),
-                'attend_programme'  => (string) ($programmeId ?? ''),
+            $record = Attendance::firstOrCreate([
+                'attend_date' => $attendanceDate,
+                'attend_batch' => (string) $batchId,
+                'attend_student' => (string) $stuId,
+            ], [
+                'attend_session' => (string) ($sessionId ?? ''),
+                'attend_center' => (string) ($centerId ?? ''),
+                'attend_programme' => (string) ($programmeId ?? ''),
                 'attend_technology' => (string) $technologyId,
-                'attend_batch'      => (string) $batchId,
-                'attend_student'    => (string) $stuId,
-                'attendance'        => $attendance,
-                'attend_by'         => $attendBy,
-                'added_date'        => $addedDate,
-                'added_time'        => $addedTime,
+                'attendance' => $attendance,
+                'attend_by' => $attendBy,
+                'added_date' => $addedDate,
+                'added_time' => $addedTime,
             ]);
 
-            $savedCount++;
+            if ($record->wasRecentlyCreated) {
+                $savedCount++;
+            }
         }
 
         if ($savedCount === 0) {
             return response()->json([
                 'status' => false,
-                'message' => 'No valid attendance rows found.'
+                'message' => 'No new attendance rows to save.'
             ]);
         }
 
@@ -484,23 +424,19 @@ class AttendanceController extends Controller
                 $studentMobile = preg_replace('/\D+/', '', (string) $student->stu_mobile);
                 $status = isset($mobileMap[$studentMobile]) ? 'P' : 'A';
 
-                DB::table('tbl_attendance')->updateOrInsert(
-                    [
-                        'attend_date'       => $attendanceDate,
-                        'attend_technology' => (string) $student->technology_id,
-                        'attend_batch'      => (string) $student->batch_id,
-                        'attend_student'    => (string) $student->stu_id,
-                    ],
-                    [
-                        'attend_session'    => (string) $student->session_id,
-                        'attend_center'     => (string) $student->center_id,
-                        'attend_programme'  => (string) $student->programme_id,
-                        'attendance'        => $status,
-                        'attend_by'         => $attendBy,
-                        'added_date'        => $addedDate,
-                        'added_time'        => $addedTime,
-                    ]
-                );
+                DB::table('tbl_attendance')->upsert([
+                    'attend_date' => $attendanceDate,
+                    'attend_batch' => (string) $student->batch_id,
+                    'attend_student' => (string) $student->stu_id,
+                    'attend_technology' => (string) $student->technology_id,
+                    'attend_session' => (string) $student->session_id,
+                    'attend_center' => (string) $student->center_id,
+                    'attend_programme' => (string) $student->programme_id,
+                    'attendance' => $status,
+                    'attend_by' => $attendBy,
+                    'added_date' => $addedDate,
+                    'added_time' => $addedTime,
+                ], ['attend_date', 'attend_batch', 'attend_student']);
 
                 $savedRows++;
 
