@@ -86,7 +86,7 @@ class SubjectMockTestController extends Controller
       ->where('tbl_subject_mock_tests.subject_mock_test_id', $id)
       ->firstOrFail();
 
-    return view('Admin.Content.show_Subject_mock', compact('mockTest'));
+    return view('Admin.Content.show_subject_mock', compact('mockTest'));
   }
 
   public function edit($id): View
