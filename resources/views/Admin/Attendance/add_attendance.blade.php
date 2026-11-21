@@ -348,7 +348,8 @@
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"
+  integrity="sha384-3zSEDfvllQohrq0PHL1fOXJuC/jSOO34H46t6UQfobFOmxE5BpjjaIJY5F2/bMnU" crossorigin="anonymous"></script>
 
 
 <script>
@@ -707,45 +708,34 @@
       });
     });
 
-    document.addEventListener('DOMContentLoaded', function() {
-      const generateBtn = document.getElementById('generateQrBtn');
-      const qrBox = document.getElementById('qrCodeBox');
-      const qrLinkInput = document.getElementById('qrLinkInput');
-      const copyBtn = document.getElementById('copyQrLinkBtn');
-      const qrModalEl = document.getElementById('qrAttendanceModal');
-      const qrModal = new bootstrap.Modal(qrModalEl);
+    const qrBox = document.getElementById('qrCodeBox');
+    const qrLinkInput = document.getElementById('qrLinkInput');
+    const copyBtn = document.getElementById('copyQrLinkBtn');
+    const qrModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('qrAttendanceModal'));
 
-      generateBtn.addEventListener('click', function() {
-        // Yahan apna live/public URL dena hai
-        const qrUrl = "{{ route('qr.attendance.form') }}";
-        // Custom link dena ho to ऊपर wali line ki jagah:
-        // const qrUrl = "https://yourdomain.com/qr-attendance";
+    document.getElementById('generateQrBtn').addEventListener('click', function () {
+      const qrUrl = @js(route('qr.attendance.form'));
+      qrLinkInput.value = qrUrl;
+      qrBox.replaceChildren();
+      qrModal.show();
 
-        qrBox.innerHTML = "";
-        qrLinkInput.value = qrUrl;
-
-        new QRCode(qrBox, {
-          text: qrUrl,
-          width: 220,
-          height: 220
-        });
-
-            
-      });
-
-      copyBtn.addEventListener('click', function() {
-        qrLinkInput.select();
-        qrLinkInput.setSelectionRange(0, 99999);
-        navigator.clipboard.writeText(qrLinkInput.value)
-          .then(() => {
-            copyBtn.textContent = "Copied";
-            setTimeout(() => {
-              copyBtn.textContent = "Copy Link";
-            }, 1500);
-          });
-      });
+      if (typeof QRCode !== 'undefined') {
+        new QRCode(qrBox, { text: qrUrl, width: 220, height: 220 });
+      } else {
+        qrBox.textContent = 'Share the link below to open the attendance form.';
+      }
     });
 
+    copyBtn.addEventListener('click', async function () {
+      qrLinkInput.select();
+      try {
+        await navigator.clipboard.writeText(qrLinkInput.value);
+        copyBtn.textContent = 'Copied';
+        setTimeout(() => { copyBtn.textContent = 'Copy Link'; }, 1500);
+      } catch {
+        showToast('info', 'Copy the selected link using your device.');
+      }
+    });
 
   });
 </script>
