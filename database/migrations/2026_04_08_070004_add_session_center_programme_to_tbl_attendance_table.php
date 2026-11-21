@@ -20,19 +20,22 @@ return new class extends Migration
             $table->index(['attend_session', 'attend_center', 'attend_programme'], 'idx_session_center_programme');
         });
 
-        DB::statement("
-        UPDATE tbl_attendance a
-        JOIN tbl_batch b ON b.batch_id = a.attend_batch
-        JOIN tbl_student s ON s.stu_id = a.attend_student
-        SET
-        a.attend_session = b.session_id,
-        a.attend_center = s.center_id,
-        a.attend_programme = b.programme_id
-        WHERE
-        a.attend_session = ''
-        OR a.attend_center = ''
-        OR a.attend_programme = ''
-        ");
+        $batch = DB::table('tbl_batch')->whereColumn('batch_id', 'tbl_attendance.attend_batch');
+        $student = DB::table('tbl_student')->whereColumn('stu_id', 'tbl_attendance.attend_student');
+
+        DB::table('tbl_attendance')
+            ->whereExists($batch)
+            ->whereExists($student)
+            ->where(function ($query) {
+                $query->where('attend_session', '')
+                    ->orWhere('attend_center', '')
+                    ->orWhere('attend_programme', '');
+            })
+            ->update([
+                'attend_session' => (clone $batch)->select('session_id'),
+                'attend_center' => (clone $student)->select('center_id'),
+                'attend_programme' => (clone $batch)->select('programme_id'),
+            ]);
     }
 
     public function down(): void
