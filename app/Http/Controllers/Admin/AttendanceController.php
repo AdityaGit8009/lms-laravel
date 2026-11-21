@@ -637,6 +637,16 @@ class AttendanceController extends Controller
 
     public function viewAttendance(Request $request)
     {
+        return view('Admin.Attendance.view_attendance', $this->attendanceReport($request));
+    }
+
+    public function viewAttendanceData(Request $request)
+    {
+        return response()->json($this->attendanceReport($request));
+    }
+
+    private function attendanceReport(Request $request): array
+    {
         $defaultToDate = now()->format('Y-m-d');
         $defaultFromDate = now()->subDays(12)->format('Y-m-d');
 
@@ -776,7 +786,7 @@ class AttendanceController extends Controller
 
         $totalStudents = $studentRows->count();
 
-        return view('Admin.Attendance.view_attendance', compact(
+        return compact(
             'sessions',
             'centers',
             'programmes',
@@ -798,7 +808,7 @@ class AttendanceController extends Controller
             'overallPresent',
             'overallAbsent',
             'totalStudents'
-        ));
+        );
     }
 
     public function toggleAttendanceCell(Request $request)
