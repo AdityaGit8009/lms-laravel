@@ -21,22 +21,22 @@
   <div class="soft-card">
     <div class="soft-card-title">Update Password</div>
 
-    <form method="POST" action="#" class="form-grid">
+    <form method="POST" action="{{ route('student.password.update') }}" class="form-grid">
       @csrf
 
       <div class="field-group">
-        <label>Current Password</label>
-        <input type="password" name="current_password" placeholder="Current password enter karein">
+        <label for="current_password">Current Password</label>
+        <input type="password" id="current_password" name="current_password" autocomplete="current-password" required placeholder="Current password enter karein">
       </div>
 
       <div class="field-group">
-        <label>New Password</label>
-        <input type="password" name="new_password" placeholder="New password enter karein">
+        <label for="password">New Password</label>
+        <input type="password" id="password" name="password" autocomplete="new-password" required placeholder="New password enter karein">
       </div>
 
       <div class="field-group">
-        <label>Confirm Password</label>
-        <input type="password" name="new_password_confirmation" placeholder="Password dobara enter karein">
+        <label for="password_confirmation">Confirm Password</label>
+        <input type="password" id="password_confirmation" name="password_confirmation" autocomplete="new-password" required placeholder="Password dobara enter karein">
       </div>
 
       <div class="page-actions">

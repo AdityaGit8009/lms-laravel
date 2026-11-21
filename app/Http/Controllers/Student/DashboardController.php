@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -96,4 +98,19 @@ class DashboardController extends Controller
   public function announcements(Request $request): View { $student = $request->user(); return view('Student.announcements', array_merge(['student' => $student], $this->sidebarData())); }
   public function profile(Request $request): View { $student = $request->user(); return view('Student.profile', array_merge(['student' => $student], $this->sidebarData())); }
   public function changePassword(Request $request): View { $student = $request->user(); return view('Student.change_password', array_merge(['student' => $student], $this->sidebarData())); }
+
+  public function updatePassword(Request $request): RedirectResponse
+  {
+    $validated = $request->validate([
+      'current_password' => ['required', 'current_password:web'],
+      'password' => ['required', 'string', 'min:6', 'confirmed', 'different:current_password'],
+    ]);
+
+    $student = $request->user();
+    $student->password = Hash::make($validated['password']);
+    $student->save();
+    $request->session()->regenerate();
+
+    return redirect()->route('student.change_password')->with('success', 'Password changed successfully.');
+  }
 }

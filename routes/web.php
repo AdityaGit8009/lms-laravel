@@ -134,6 +134,7 @@ Route::prefix('student')->middleware(['auth', 'student'])->group(function () {
   Route::get('/announcements', [DashboardController::class, 'announcements'])->name('student.announcements');
   Route::get('/profile', [DashboardController::class, 'profile'])->name('student.profile');
   Route::get('/change-password', [DashboardController::class, 'changePassword'])->name('student.change_password');
+  Route::post('/change-password', [DashboardController::class, 'updatePassword'])->name('student.password.update');
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
