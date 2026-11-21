@@ -75,6 +75,17 @@
               value="{{ old('mobile') }}"
               required>
           </div>
+          @if($batches->count() > 1)
+          <div class="mb-3">
+            <label for="attendanceBatch" class="form-label fw-semibold">Batch</label>
+            <select id="attendanceBatch" name="batch_id" class="form-select" required>
+              <option value="">Select your batch</option>
+              @foreach($batches as $batch)
+              <option value="{{ $batch->batch_id }}" @selected(old('batch_id') == $batch->batch_id)>{{ $batch->batch_name }}</option>
+              @endforeach
+            </select>
+          </div>
+          @endif
           <button type="submit" class="btn btn-primary w-100 btn-submit">
             Submit Attendance
           </button>
