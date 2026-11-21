@@ -27,6 +27,7 @@ use App\Http\Controllers\Admin\ViewStudentController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RegisterController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\QrAttendanceController;
 
 Route::prefix('auth')->middleware('web')->group(function () {
   Route::post('/register', [RegisterController::class, 'register'])->name('api.register');
