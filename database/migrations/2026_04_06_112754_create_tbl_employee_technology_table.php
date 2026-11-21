@@ -1,27 +1,12 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 
+// The earlier 2026_04_06_000004_create_tbl_employee_technology_table migration owns this table.
+// Keep this recorded migration name valid for installations using the SQL snapshot.
 return new class extends Migration
 {
-    public function up(): void
-    {
-        Schema::create('tbl_employee_technology', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('emp_id');
-            $table->unsignedBigInteger('technology_id');
-            $table->enum('is_active', ['Y', 'N'])->default('Y');
-            $table->string('created_by')->nullable();
-            $table->string('updated_by')->nullable();
-            $table->timestamps();
-            $table->unique(['emp_id', 'technology_id']);
-        });
-    }
+    public function up(): void {}
 
-    public function down(): void
-    {
-        Schema::dropIfExists('tbl_employee_technology');
-    }
+    public function down(): void {}
 };
