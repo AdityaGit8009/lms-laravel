@@ -120,25 +120,13 @@ composer install
 
 ### 3. Create and configure the environment file
 
-The repository listing does **not** currently show an `.env.example` file. If one exists in your checkout, copy it. Otherwise, create a local `.env` using the settings required by your application and deployment environment. Configure at least `APP_NAME`, `APP_ENV`, `APP_URL`, and the appropriate `DB_*` variables.
+Copy the supplied template from the project root:
 
-**Example database configuration for a local MySQL installation:**
-
-```dotenv
-APP_NAME="LMS"
-APP_ENV=local
-APP_DEBUG=true
-APP_URL=http://127.0.0.1:8000
-
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=lms
-DB_USERNAME=root
-DB_PASSWORD=
+```bash
+cp .env.example .env
 ```
 
-This is a **sample**, not a copy of the repository's actual environment settings. Use credentials for your own database. Ensure your `.env` also contains the standard Laravel configuration required by your application.
+In PowerShell, use `Copy-Item .env.example .env`. Set `APP_URL`, `DB_DATABASE`, `DB_USERNAME`, and `DB_PASSWORD` for your local installation. The template selects MySQL, file-backed sessions and cache, and a synchronous queue.
 
 ### 4. Generate the application key
 
@@ -251,7 +239,6 @@ Before exposing the application on a public server:
 - [ ] Audit role-based authorization throughout admin/student pages
 - [ ] Expand automated tests for registration, approval, attendance, and assessments
 - [ ] Add sample screenshots for admin and student dashboards
-- [ ] Provide a safe, sanitized `.env.example`
 - [ ] Document database migrations and test data seeding
 - [ ] Add CI checks for tests, linting, and dependency vulnerabilities
 - [ ] Publish a verified production deployment guide
